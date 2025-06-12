@@ -1,4 +1,4 @@
-﻿using System;
+﻿  using System;
 
 namespace Ogrenci_Bilgi_Sistemi
 {
@@ -19,7 +19,7 @@ namespace Ogrenci_Bilgi_Sistemi
             this.ogrenciNo = ogrenciNo;
         }
 
-        public Not(string ogrenciNo, string dersKodu, double vize, double final)
+        public Not(string ogrenciNo, string dersKodu, double vize, double final )
         {
             this.ogrenciNo = ogrenciNo;
             this.dersKodu = dersKodu;

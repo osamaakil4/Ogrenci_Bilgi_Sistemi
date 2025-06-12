@@ -8,14 +8,14 @@ namespace Ogrenci_Bilgi_Sistemi
         private DersYonetici dersYonetici;
         private NotYonetici notYonetici;
         private TranskriptYonetici transkriptYonetici;
-        private DersKayitYonetici dersKayitYonetici; // Yeni eklenen
+        private DersKayitYonetici dersKayitYonetici; 
 
         // Public property'ler - Formlara erişim için
         public OgrenciYonetici OgrenciYoneticisi => ogrenciYonetici;
         public DersYonetici DersYoneticisi => dersYonetici;
         public NotYonetici NotYoneticisi => notYonetici;
         public TranskriptYonetici TranskriptYoneticisi => transkriptYonetici;
-        public DersKayitYonetici DersKayitYoneticisi => dersKayitYonetici; // Yeni eklenen
+        public DersKayitYonetici DersKayitYoneticisi => dersKayitYonetici; 
 
         // Constructor
         public SistemYonetici()

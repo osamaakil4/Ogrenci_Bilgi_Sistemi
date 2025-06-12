@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Ogrenci_Bilgi_Sistemi
 {
@@ -16,6 +17,7 @@ namespace Ogrenci_Bilgi_Sistemi
         private OgrenciYonetici ogrenciYonetici;
         private ComboBox cmbOgrenci;
         private RichTextBox rtbTranskript;
+        private Button btnIndir;
 
         public TranskriptForm(TranskriptYonetici transkriptYonetici, OgrenciYonetici ogrenciYonetici)
         {
@@ -33,7 +35,7 @@ namespace Ogrenci_Bilgi_Sistemi
             this.btnGoster = new Button();
             this.lblTranskript = new Label();
             rtbTranskript = new RichTextBox();
-            this.btnYazdir = new Button();
+            this.btnIndir = new Button();
             this.btnKapat = new Button();
             SuspendLayout();
             // 
@@ -62,7 +64,7 @@ namespace Ogrenci_Bilgi_Sistemi
             cmbOgrenci.Name = "cmbOgrenci";
             cmbOgrenci.Size = new Size(300, 33);
             cmbOgrenci.TabIndex = 2;
-           
+
             // 
             // btnGoster
             // 
@@ -97,17 +99,17 @@ namespace Ogrenci_Bilgi_Sistemi
             rtbTranskript.TabIndex = 5;
             rtbTranskript.Text = "";
             // 
-            // btnYazdir
+            // btnIndir
             // 
-            this.btnYazdir.BackColor = Color.Gray;
-            this.btnYazdir.ForeColor = Color.White;
-            this.btnYazdir.Location = new Point(450, 520);
-            this.btnYazdir.Name = "btnYazdir";
-            this.btnYazdir.Size = new Size(100, 30);
-            this.btnYazdir.TabIndex = 6;
-            this.btnYazdir.Text = "Yazdır";
-            this.btnYazdir.UseVisualStyleBackColor = false;
-            this.btnYazdir.Click += this.BtnYazdir_Click;
+            this.btnIndir.BackColor = Color.Green;
+            this.btnIndir.ForeColor = Color.White;
+            this.btnIndir.Location = new Point(450, 520);
+            this.btnIndir.Name = "btnIndir";
+            this.btnIndir.Size = new Size(100, 30);
+            this.btnIndir.TabIndex = 6;
+            this.btnIndir.Text = "İndir";
+            this.btnIndir.UseVisualStyleBackColor = false;
+            this.btnIndir.Click += this.BtnIndir_Click;
             // 
             // btnKapat
             // 
@@ -130,7 +132,7 @@ namespace Ogrenci_Bilgi_Sistemi
             Controls.Add(this.btnGoster);
             Controls.Add(this.lblTranskript);
             Controls.Add(rtbTranskript);
-            Controls.Add(this.btnYazdir);
+            Controls.Add(this.btnIndir);
             Controls.Add(this.btnKapat);
             MinimumSize = new Size(700, 600);
             Name = "TranskriptForm";
@@ -169,36 +171,66 @@ namespace Ogrenci_Bilgi_Sistemi
             }
         }
 
-        private void BtnYazdir_Click(object sender, EventArgs e)
+        private void BtnIndir_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(rtbTranskript.Text))
+            if (string.IsNullOrWhiteSpace(rtbTranskript.Text) ||
+                rtbTranskript.Text.Contains("Bu öğrenci için transkript oluşturulamadı"))
             {
-                MessageBox.Show("Yazdırılacak transkript bulunamadı!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("İndirilecek transkript bulunamadı!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (cmbOgrenci.SelectedIndex == -1)
+            {
+                MessageBox.Show("Lütfen bir öğrenci seçiniz!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             try
             {
-                PrintDialog printDialog = new PrintDialog();
-                System.Drawing.Printing.PrintDocument printDocument = new System.Drawing.Printing.PrintDocument();
+                string ogrenciNo = cmbOgrenci.Text.Split('-')[0].Trim();
 
-                printDocument.PrintPage += (s, ev) =>
+                // SaveFileDialog kullanarak kullanıcının dosya konumunu seçmesini sağla
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "Metin Dosyası (*.txt)|*.txt|PDF Dosyası (*.pdf)|*.pdf";
+                saveFileDialog.FilterIndex = 1;
+                saveFileDialog.DefaultExt = "txt";
+                saveFileDialog.FileName = $"Transkript_{ogrenciNo}_{DateTime.Now:yyyyMMdd_HHmmss}";
+                saveFileDialog.Title = "Transkripti Kaydet";
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    ev.Graphics.DrawString(rtbTranskript.Text, new Font("Courier New", 10),
-                        Brushes.Black, ev.MarginBounds);
-                };
+                    string dosyaYolu = saveFileDialog.FileName;
+                    string uzanti = Path.GetExtension(dosyaYolu).ToLower();
 
-                printDialog.Document = printDocument;
+                    if (uzanti == ".txt")
+                    {
+                        // Metin dosyası olarak kaydet
+                        File.WriteAllText(dosyaYolu, rtbTranskript.Text, Encoding.UTF8);
+                        MessageBox.Show($"Transkript başarıyla indirildi:\n{dosyaYolu}",
+                                      "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else if (uzanti == ".pdf")
+                    {
+                        // PDF olarak kaydetmek için TranskriptYonetici'deki PDFOlustur metodunu kullan
+                        // Ancak bu metod şu an basit text dosyası oluşturuyor
+                        // Gerçek PDF oluşturma için iTextSharp gibi kütüphaneler gerekir
 
-                if (printDialog.ShowDialog() == DialogResult.OK)
-                {
-                    printDocument.Print();
-                    MessageBox.Show("Transkript yazdırıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        // Şimdilik PDF uzantısıyla text dosyası oluştur
+                        string pdfDosyaYolu = Path.ChangeExtension(dosyaYolu, ".txt");
+                        File.WriteAllText(pdfDosyaYolu, rtbTranskript.Text, Encoding.UTF8);
+
+                        MessageBox.Show($"Transkript metin dosyası olarak indirildi:\n{pdfDosyaYolu}\n\n" +
+                                      "Not: Gerçek PDF oluşturma için ek kütüphaneler gereklidir.",
+                                     "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    
+                    }
+
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Yazdırma hatası: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Dosya indirme hatası: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -206,7 +238,5 @@ namespace Ogrenci_Bilgi_Sistemi
         {
             this.Close();
         }
-
-       
     }
 }
