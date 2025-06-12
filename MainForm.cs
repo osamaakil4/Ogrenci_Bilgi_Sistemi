@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Windows.Forms;
+
+
 namespace Ogrenci_Bilgi_Sistemi
 {
-
     public partial class MainForm : Form
     {
         private SistemYonetici sistemYonetici;
+        private VeriYoneticisi veriYoneticisi; // Veri yöneticisi eklendi
 
         public MainForm()
         {
             InitializeComponent();
             sistemYonetici = new SistemYonetici();
+            veriYoneticisi = new VeriYoneticisi(); // Veri yöneticisi başlatıldı
         }
 
         /// <summary>
@@ -132,7 +135,8 @@ namespace Ogrenci_Bilgi_Sistemi
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Öğrenci Bilgi Sistemi";
-            Load += MainForm_Load_1;
+            Load += MainForm_Load;
+            FormClosing += MainForm_FormClosing; // Form kapanırken verileri kaydet
             ResumeLayout(false);
         }
 
@@ -140,15 +144,20 @@ namespace Ogrenci_Bilgi_Sistemi
         {
             OgrenciKayitForm form = new OgrenciKayitForm(sistemYonetici.OgrenciYoneticisi);
             form.ShowDialog();
+
+            // Form kapandıktan sonra verileri kaydet
+            VerileriKaydet();
         }
 
         private void BtnDersOlustur_Click(object sender, EventArgs e)
         {
             DersOlusturForm form = new DersOlusturForm(sistemYonetici.DersYoneticisi);
             form.ShowDialog();
+
+            // Form kapandıktan sonra verileri kaydet
+            VerileriKaydet();
         }
 
-        // Yeni metod - Ders Kayıt formu açma
         private void BtnDersKayit_Click(object sender, EventArgs e)
         {
             try
@@ -159,6 +168,9 @@ namespace Ogrenci_Bilgi_Sistemi
                     sistemYonetici.DersYoneticisi
                 );
                 form.ShowDialog();
+
+                // Form kapandıktan sonra verileri kaydet
+                VerileriKaydet();
             }
             catch (Exception ex)
             {
@@ -171,13 +183,15 @@ namespace Ogrenci_Bilgi_Sistemi
         {
             try
             {
-                // Doğru sırayla parametreleri geçirin
                 NotGirForm form = new NotGirForm(
                     sistemYonetici.OgrenciYoneticisi,
                     sistemYonetici.DersYoneticisi,
                     sistemYonetici.NotYoneticisi
                 );
                 form.ShowDialog();
+
+                // Form kapandıktan sonra verileri kaydet
+                VerileriKaydet();
             }
             catch (Exception ex)
             {
@@ -194,7 +208,7 @@ namespace Ogrenci_Bilgi_Sistemi
 
         private void BtnOgrenciListele_Click(object sender, EventArgs e)
         {
-            OgrenciListeForm form = new OgrenciListeForm(sistemYonetici.OgrenciYoneticisi);
+            OgrenciListeForm form = new OgrenciListeForm(sistemYonetici);
             form.ShowDialog();
         }
 
@@ -211,27 +225,71 @@ namespace Ogrenci_Bilgi_Sistemi
 
             if (result == DialogResult.Yes)
             {
+                // Çıkmadan önce verileri kaydet
+                VerileriKaydet();
                 Application.Exit();
             }
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            // Örnek veriler yükle
-            sistemYonetici.OrnekVerilerYukle();
-            MessageBox.Show("Sistem başlatıldı ve örnek veriler yüklendi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                // Önce kayıtlı verileri yüklemeye çalış
+                veriYoneticisi.TumVerileriYukle(sistemYonetici);
+
+                // Eğer hiç veri yoksa (ilk çalıştırma) örnek verileri yükle
+                if (sistemYonetici.OgrenciYoneticisi.TumOgrenciler().Count == 0)
+                {
+                    sistemYonetici.OrnekVerilerYukle();
+                    VerileriKaydet(); 
+                   
+                }
+                else
+                {
+                   
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Veriler yüklenirken hata oluştu: {ex.Message}\nÖrnek veriler yüklenecek.",
+                    "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                // Hata durumunda örnek verileri yükle
+                sistemYonetici.OrnekVerilerYukle();
+                VerileriKaydet();
+            }
         }
 
-        private void MainForm_Load_1(object sender, EventArgs e)
+        // Form kapanırken çağrılacak
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            VerileriKaydet();
+        }
 
+        // Verileri kaydetme metodu
+        private void VerileriKaydet()
+        {
+            try
+            {
+                if (!veriYoneticisi.TumVerileriKaydet(sistemYonetici))
+                {
+                    MessageBox.Show("Veriler kaydedilirken bir hata oluştu!", "Uyarı",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Veriler kaydedilirken hata: {ex.Message}", "Hata",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // Field'lar - Designer için gerekli
         private System.Windows.Forms.Label lblBaslik;
         private System.Windows.Forms.Button btnOgrenciKaydet;
         private System.Windows.Forms.Button btnDersOlustur;
-        private System.Windows.Forms.Button btnDersKayit; 
+        private System.Windows.Forms.Button btnDersKayit;
         private System.Windows.Forms.Button btnNotGir;
         private System.Windows.Forms.Button btnTranskript;
         private System.Windows.Forms.Button btnOgrenciListele;

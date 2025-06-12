@@ -1,7 +1,5 @@
 ﻿using Ogrenci_Bilgi_Sistemi;
 using System;
-using System;
-using System.Collections.Generic;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,14 +7,14 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace OgrenciBilgiSistemi
-{
+
     public class VeriYoneticisi
     {
         private string dosyaYolu;
         private string ogrenciDosya;
         private string dersDosya;
         private string notDosya;
+        private string dersKayitDosya;
 
         public VeriYoneticisi()
         {
@@ -33,6 +31,7 @@ namespace OgrenciBilgiSistemi
             ogrenciDosya = Path.Combine(dosyaYolu, "ogrenciler.json");
             dersDosya = Path.Combine(dosyaYolu, "dersler.json");
             notDosya = Path.Combine(dosyaYolu, "notlar.json");
+            dersKayitDosya = Path.Combine(dosyaYolu, "derskayitlari.json");
         }
 
         // Öğrencileri kaydetme
@@ -115,11 +114,11 @@ namespace OgrenciBilgiSistemi
                 {
                     if (veri.Turu == "Zorunlu")
                     {
-                        dersler.Add(new ZorunluDers(veri.Kod, veri.Ad, veri.Kredi,veri.Akts, veri.Donem));
+                        dersler.Add(new ZorunluDers(veri.Kod, veri.Ad, veri.Kredi, veri.Akts, veri.Donem));
                     }
                     else
                     {
-                        dersler.Add( new SecmeliDers(veri.Kod, veri.Ad, veri.Kredi,veri.Akts,veri.Donem));
+                        dersler.Add(new SecmeliDers(veri.Kod, veri.Ad, veri.Kredi, veri.Akts, veri.Donem));
                     }
                 }
 
@@ -132,13 +131,27 @@ namespace OgrenciBilgiSistemi
             }
         }
 
-        // Notları kaydetme
+        // GÜNCELLENMIŞ: Notları kaydetme - basit veri yapısı kullanılıyor
         public bool NotlariKaydet(List<Not> notlar)
         {
             try
             {
-                string json = JsonSerializer.Serialize(notlar, new JsonSerializerOptions { WriteIndented = true });
+                var notVerileri = new List<NotVeri>();
+                foreach (var not in notlar)
+                {
+                    notVerileri.Add(new NotVeri
+                    {
+                        OgrenciNo = not.OgrenciNo,
+                        DersKodu = not.DersKodu,
+                        VizeNotu = not.Vize,
+                        FinalNotu = not.Final
+                   
+                    });
+                }
+
+                string json = JsonSerializer.Serialize(notVerileri, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(notDosya, json);
+                Console.WriteLine($"Toplam {notVerileri.Count} not kaydedildi.");
                 return true;
             }
             catch (Exception ex)
@@ -148,16 +161,36 @@ namespace OgrenciBilgiSistemi
             }
         }
 
-        // Notları yükleme
+        // GÜNCELLENMIŞ: Notları yükleme - basit veri yapısından Not nesnesi oluşturma
         public List<Not> NotlariYukle()
         {
             try
             {
                 if (!File.Exists(notDosya))
+                {
+                    Console.WriteLine("Not dosyası bulunamadı.");
                     return new List<Not>();
+                }
 
                 string json = File.ReadAllText(notDosya);
-                return JsonSerializer.Deserialize<List<Not>>(json) ?? new List<Not>();
+                var notVerileri = JsonSerializer.Deserialize<List<NotVeri>>(json) ?? new List<NotVeri>();
+                Console.WriteLine($"Dosyadan {notVerileri.Count} not yüklendi.");
+
+                var notlar = new List<Not>();
+                foreach (var veri in notVerileri)
+                {
+                    var not = new Not(veri.OgrenciNo, veri.DersKodu, veri.VizeNotu, veri.FinalNotu)
+                    {
+                    
+                    };
+
+                    // Bütünleme notu varsa ekle
+                
+                    notlar.Add(not);
+                }
+
+                Console.WriteLine($"Toplam {notlar.Count} not nesnesi oluşturuldu.");
+                return notlar;
             }
             catch (Exception ex)
             {
@@ -166,39 +199,152 @@ namespace OgrenciBilgiSistemi
             }
         }
 
-        // Tüm verileri kaydetme
+        // Ders kayıtlarını kaydetme
+        public bool DersKayitlariniKaydet(List<OgrenciDersKayit> dersKayitlari)
+        {
+            try
+            {
+                var kayitVerileri = new List<DersKayitVeri>();
+                foreach (var kayit in dersKayitlari)
+                {
+                    kayitVerileri.Add(new DersKayitVeri
+                    {
+                        OgrenciNo = kayit.OgrenciNo,
+                        DersKodu = kayit.DersKodu
+                    });
+                }
+                string json = JsonSerializer.Serialize(kayitVerileri, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(dersKayitDosya, json);
+                Console.WriteLine($"Toplam {kayitVerileri.Count} ders kaydı kaydedildi.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ders kayıt verileri kaydedilirken hata: {ex.Message}");
+                return false;
+            }
+        }
+
+        // Ders kayıtlarını yükleme
+        public Dictionary<string, List<string>> DersKayitlariniYukle()
+        {
+            try
+            {
+                if (!File.Exists(dersKayitDosya))
+                    return new Dictionary<string, List<string>>();
+
+                string json = File.ReadAllText(dersKayitDosya);
+                var kayitVerileri = JsonSerializer.Deserialize<List<DersKayitVeri>>(json) ?? new List<DersKayitVeri>();
+
+                var dersKayitlari = new Dictionary<string, List<string>>();
+                foreach (var veri in kayitVerileri)
+                {
+                    if (!dersKayitlari.ContainsKey(veri.OgrenciNo))
+                    {
+                        dersKayitlari[veri.OgrenciNo] = new List<string>();
+                    }
+                    dersKayitlari[veri.OgrenciNo].Add(veri.DersKodu);
+                }
+
+                Console.WriteLine($"Toplam {kayitVerileri.Count} ders kaydı yüklendi.");
+                return dersKayitlari;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ders kayıt verileri yüklenirken hata: {ex.Message}");
+                return new Dictionary<string, List<string>>();
+            }
+        }
+
+        // GÜNCELLENMIŞ: Tüm verileri kaydetme - daha detaylı log
         public bool TumVerileriKaydet(SistemYonetici sistem)
         {
             bool basarili = true;
+
+            Console.WriteLine("Veri kaydetme işlemi başlatılıyor...");
+
+            // Öğrencileri kaydet
+            var ogrenciSayisi = sistem.OgrenciYoneticisi.TumOgrenciler().Count;
+            Console.WriteLine($"Kaydedilecek öğrenci sayısı: {ogrenciSayisi}");
             basarili &= OgrencileriKaydet(sistem.OgrenciYoneticisi.TumOgrenciler());
+
+            // Dersleri kaydet
+            var dersSayisi = sistem.DersYoneticisi.TumDersler().Count;
+            Console.WriteLine($"Kaydedilecek ders sayısı: {dersSayisi}");
             basarili &= DersleriKaydet(sistem.DersYoneticisi.TumDersler());
+
+            // Notları kaydet
+            var notSayisi = sistem.NotYoneticisi.TumNotlar().Count;
+            Console.WriteLine($"Kaydedilecek not sayısı: {notSayisi}");
             basarili &= NotlariKaydet(sistem.NotYoneticisi.TumNotlar());
+
+            // Ders kayıtlarını da kaydet
+            if (sistem.DersKayitYoneticisi != null)
+            {
+                var dersKayitSayisi = sistem.DersKayitYoneticisi.TumDersKayitlari().Count;
+                Console.WriteLine($"Kaydedilecek ders kaydı sayısı: {dersKayitSayisi}");
+                basarili &= DersKayitlariniKaydet(sistem.DersKayitYoneticisi.TumDersKayitlari());
+            }
+
+            Console.WriteLine($"Veri kaydetme işlemi tamamlandı. Başarı durumu: {basarili}");
             return basarili;
         }
 
-        // Tüm verileri yükleme
+        // GÜNCELLENMIŞ: Tüm verileri yükleme - doğru sıralama ve daha detaylı log
         public void TumVerileriYukle(SistemYonetici sistem)
         {
-            // Öğrencileri yükle
+            Console.WriteLine("Veri yükleme işlemi başlatılıyor...");
+
+            // 1. Önce öğrencileri yükle
             var ogrenciler = OgrencileriYukle();
+            Console.WriteLine($"Yüklenen öğrenci sayısı: {ogrenciler.Count}");
             foreach (var ogrenci in ogrenciler)
             {
                 sistem.OgrenciYoneticisi.OgrenciEkle(ogrenci);
             }
 
-            // Dersleri yükle
+            // 2. Sonra dersleri yükle
             var dersler = DersleriYukle();
+            Console.WriteLine($"Yüklenen ders sayısı: {dersler.Count}");
             foreach (var ders in dersler)
             {
                 sistem.DersYoneticisi.DersEkle(ders);
             }
 
-            // Notları yükle
+            // 3. Ders kayıtlarını yükle
+            var dersKayitlari = DersKayitlariniYukle();
+            int toplamDersKayit = 0;
+            foreach (var kayit in dersKayitlari)
+            {
+                foreach (var dersKodu in kayit.Value)
+                {
+                    sistem.DersKayitYoneticisi.DersKaydiEkle(kayit.Key, dersKodu);
+                    toplamDersKayit++;
+                }
+            }
+            Console.WriteLine($"Yüklenen ders kaydı sayısı: {toplamDersKayit}");
+
+            // 4. En son notları yükle (öğrenci ve ders bilgileri hazır olduktan sonra)
             var notlar = NotlariYukle();
+            Console.WriteLine($"Yüklenen not sayısı: {notlar.Count}");
             foreach (var not in notlar)
             {
-                sistem.NotYoneticisi.NotEkle(not);
+                // Not eklemeden önce öğrenci ve dersin var olduğunu kontrol et
+                var ogrenci = sistem.OgrenciYoneticisi.OgrenciAra(not.OgrenciNo);
+                var ders = sistem.DersYoneticisi.DersBul(not.DersKodu);
+
+                if (ogrenci != null && ders != null)
+                {
+                    sistem.NotYoneticisi.NotEkle(not);
+                    Console.WriteLine($"Not eklendi: {not.OgrenciNo} - {not.DersKodu}");
+                }
+                else
+                {
+                    Console.WriteLine($"Not eklenemedi - Öğrenci veya ders bulunamadı: {not.OgrenciNo} - {not.DersKodu}");
+                }
             }
+
+            Console.WriteLine("Veri yükleme işlemi tamamlandı.");
         }
     }
 
@@ -212,4 +358,23 @@ namespace OgrenciBilgiSistemi
         public int Akts { get; set; }
         public string Turu { get; set; } // "Zorunlu" veya "Secmeli"
     }
-}
+
+    // Ders kayıt verisi için yardımcı sınıf
+    public class DersKayitVeri
+    {
+        public string OgrenciNo { get; set; }
+        public string DersKodu { get; set; }
+    }
+
+    // YENİ: Not verisi için yardımcı sınıf - JSON serileştirme için
+    public class NotVeri
+    {
+        public string OgrenciNo { get; set; }
+        public string DersKodu { get; set; }
+        public double VizeNotu { get; set; }
+        public double FinalNotu { get; set; }
+        public double ButunlemeNotu { get; set; }
+        public bool HasButunleme { get; set; }
+        public int Yil { get; set; }
+        public string Donem { get; set; }
+    }

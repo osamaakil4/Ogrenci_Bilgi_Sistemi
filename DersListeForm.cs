@@ -132,15 +132,25 @@ namespace Ogrenci_Bilgi_Sistemi
             lblToplamKredi.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
             this.Controls.Add(lblToplamKredi);
 
-            // Butonlar
+            // Butonlar - YENİ: Sil butonu eklendi
             Button btnDetay = new Button();
             btnDetay.Text = "Ders Detayı";
-            btnDetay.Location = new System.Drawing.Point(630, 568);
+            btnDetay.Location = new System.Drawing.Point(520, 568);
             btnDetay.Size = new System.Drawing.Size(100, 30);
             btnDetay.BackColor = System.Drawing.Color.Green;
             btnDetay.ForeColor = System.Drawing.Color.White;
             btnDetay.Click += BtnDetay_Click;
             this.Controls.Add(btnDetay);
+
+            // YENİ: Sil butonu
+            Button btnSil = new Button();
+            btnSil.Text = "Dersi Sil";
+            btnSil.Location = new System.Drawing.Point(630, 568);
+            btnSil.Size = new System.Drawing.Size(100, 30);
+            btnSil.BackColor = System.Drawing.Color.Red;
+            btnSil.ForeColor = System.Drawing.Color.White;
+            btnSil.Click += BtnSil_Click;
+            this.Controls.Add(btnSil);
 
             Button btnKapat = new Button();
             btnKapat.Text = "Kapat";
@@ -280,6 +290,53 @@ namespace Ogrenci_Bilgi_Sistemi
                               $"Oluşturulma Tarihi: {DateTime.Now.ToString("dd.MM.yyyy")}";
 
                 MessageBox.Show(detay, "Ders Detayı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        // YENİ: Ders silme işlemi
+        private void BtnSil_Click(object sender, EventArgs e)
+        {
+            if (dgvDersler.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Lütfen silinecek dersi seçiniz!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string dersKodu = dgvDersler.SelectedRows[0].Cells["Ders Kodu"].Value.ToString();
+            string dersAdi = dgvDersler.SelectedRows[0].Cells["Ders Adı"].Value.ToString();
+
+            // Onay dialog'u
+            DialogResult result = MessageBox.Show(
+                $"'{dersKodu} - {dersAdi}' dersini silmek istediğinizden emin misiniz?\n\n" +
+                "Bu işlem geri alınamaz ve ders ile ilgili tüm kayıtlar silinecektir!",
+                "Ders Silme Onayı",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2);
+
+            if (result == DialogResult.Yes)
+            {
+                bool basarili = dersYonetici.DersSil(dersKodu);
+
+                if (basarili)
+                {
+                    MessageBox.Show(
+                        $"'{dersKodu} - {dersAdi}' dersi başarıyla silindi.",
+                        "Başarılı",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+
+                    // Listeyi yenile
+                    DersleriYukle();
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Ders silinirken bir hata oluştu!",
+                        "Hata",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
             }
         }
 

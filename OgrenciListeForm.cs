@@ -8,17 +8,24 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace Ogrenci_Bilgi_Sistemi
 {
     public partial class OgrenciListeForm : Form
     {
         private OgrenciYonetici ogrenciYonetici;
+        private NotYonetici notYonetici; // Not silme için
+        private DersKayitYonetici dersKayitYonetici; // Ders kayıt silme için
+        private SistemYonetici sistemYonetici; // Tüm veriler için
         private DataGridView dgvOgrenciler;
         private TextBox txtArama;
 
-        public OgrenciListeForm(OgrenciYonetici ogrenciYonetici)
+        public OgrenciListeForm(SistemYonetici sistemYonetici)
         {
-            this.ogrenciYonetici = ogrenciYonetici;
+            this.sistemYonetici = sistemYonetici;
+            this.ogrenciYonetici = sistemYonetici.OgrenciYoneticisi;
+            this.notYonetici = sistemYonetici.NotYoneticisi;
+            this.dersKayitYonetici = sistemYonetici.DersKayitYoneticisi;
             InitializeComponent();
             OgrencileriYukle();
         }
@@ -32,6 +39,7 @@ namespace Ogrenci_Bilgi_Sistemi
             dgvOgrenciler = new DataGridView();
             lblToplam = new Label();
             btnDetay = new Button();
+            btnSil = new Button(); // YENİ: Silme butonu
             btnKapat = new Button();
             ((ISupportInitialize)dgvOgrenciler).BeginInit();
             SuspendLayout();
@@ -105,13 +113,25 @@ namespace Ogrenci_Bilgi_Sistemi
             // 
             btnDetay.BackColor = Color.Green;
             btnDetay.ForeColor = Color.White;
-            btnDetay.Location = new Point(500, 518);
+            btnDetay.Location = new Point(380, 518);
             btnDetay.Name = "btnDetay";
             btnDetay.Size = new Size(120, 36);
             btnDetay.TabIndex = 6;
             btnDetay.Text = "Öğrenci Detayı";
             btnDetay.UseVisualStyleBackColor = false;
             btnDetay.Click += BtnDetay_Click;
+            // 
+            // btnSil - YENİ BUTON
+            // 
+            btnSil.BackColor = Color.Red;
+            btnSil.ForeColor = Color.White;
+            btnSil.Location = new Point(520, 518);
+            btnSil.Name = "btnSil";
+            btnSil.Size = new Size(100, 36);
+            btnSil.TabIndex = 7;
+            btnSil.Text = "Öğrenci Sil";
+            btnSil.UseVisualStyleBackColor = false;
+            btnSil.Click += BtnSil_Click;
             // 
             // btnKapat
             // 
@@ -120,7 +140,7 @@ namespace Ogrenci_Bilgi_Sistemi
             btnKapat.Location = new Point(640, 518);
             btnKapat.Name = "btnKapat";
             btnKapat.Size = new Size(80, 36);
-            btnKapat.TabIndex = 7;
+            btnKapat.TabIndex = 8;
             btnKapat.Text = "Kapat";
             btnKapat.UseVisualStyleBackColor = false;
             btnKapat.Click += BtnKapat_Click;
@@ -135,6 +155,7 @@ namespace Ogrenci_Bilgi_Sistemi
             Controls.Add(dgvOgrenciler);
             Controls.Add(lblToplam);
             Controls.Add(btnDetay);
+            Controls.Add(btnSil); // YENİ buton eklendi
             Controls.Add(btnKapat);
             MinimumSize = new Size(800, 600);
             Name = "OgrenciListeForm";
@@ -227,14 +248,94 @@ namespace Ogrenci_Bilgi_Sistemi
 
             if (ogrenci != null)
             {
+                // Öğrencinin kayıtlı olduğu dersleri al
+                var kayitliDersler = dersKayitYonetici.OgrencininDersleri(ogrenciNo);
+                var ogrenciNotlari = notYonetici.OgrenciNotlari(ogrenciNo);
+
                 string detay = $"ÖĞRENCİ DETAY BİLGİLERİ\n\n" +
                               $"Öğrenci No: {ogrenci.OgrenciNo}\n" +
                               $"Ad: {ogrenci.Ad}\n" +
                               $"Soyad: {ogrenci.Soyad}\n" +
                               $"E-mail: {ogrenci.Email}\n" +
+                              $"Kayıtlı Ders Sayısı: {kayitliDersler.Count}\n" +
+                              $"Not Girilen Ders Sayısı: {ogrenciNotlari.Count}\n" +
                               $"Kayıt Tarihi: {DateTime.Now.ToString("dd.MM.yyyy")}";
 
                 MessageBox.Show(detay, "Öğrenci Detayı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        // YENİ: Öğrenci silme işlemi
+        private void BtnSil_Click(object sender, EventArgs e)
+        {
+            if (dgvOgrenciler.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Lütfen silinecek öğrenciyi seçiniz!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string ogrenciNo = dgvOgrenciler.SelectedRows[0].Cells["Öğrenci No"].Value.ToString();
+            var ogrenci = ogrenciYonetici.OgrenciGetir(ogrenciNo);
+
+            if (ogrenci == null)
+            {
+                MessageBox.Show("Öğrenci bulunamadı!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Silme onayı iste
+            var result = MessageBox.Show(
+                $"'{ogrenci.Ad} {ogrenci.Soyad}' ({ogrenci.OgrenciNo}) adlı öğrenciyi ve bu öğrenciye ait TÜM VERİLERİ (notlar, ders kayıtları) silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!",
+                "Öğrenci Silme Onayı",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    // 1. Önce öğrencinin notlarını sil
+                    var ogrenciNotlari = notYonetici.OgrenciNotlari(ogrenciNo);
+                    foreach (var not in ogrenciNotlari.ToList()) // ToList() ile kopya oluştur
+                    {
+                        notYonetici.NotSil(not.OgrenciNo, not.DersKodu);
+                    }
+
+                    // 2. Öğrencinin ders kayıtlarını sil
+                    var kayitliDersler = dersKayitYonetici.OgrencininDersleri(ogrenciNo);
+                    foreach ( var dersKodu in kayitliDersler.ToList()) // ToList() ile kopya oluştur
+                    {
+                       string a= dersKodu.ToString(); // Ders kodunu string'e çevir
+                        dersKayitYonetici.DersKaydiIptal(ogrenciNo, a);
+                    }
+
+                    // 3. Son olarak öğrenciyi sil
+                    bool basarili = ogrenciYonetici.OgrenciSil(ogrenciNo);
+
+                    if (basarili)
+                    {
+                        MessageBox.Show(
+                            $"Öğrenci '{ogrenci.Ad} {ogrenci.Soyad}' ve tüm verileri başarıyla silindi!",
+                            "Başarılı",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+
+                        // 4. Verileri dosyaya kaydet
+                        var veriYoneticisi = new VeriYoneticisi();
+                        veriYoneticisi.TumVerileriKaydet(sistemYonetici);
+
+                        // 5. Listeyi yenile
+                        OgrencileriYukle();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Öğrenci silinirken bir hata oluştu!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Öğrenci silinirken hata oluştu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

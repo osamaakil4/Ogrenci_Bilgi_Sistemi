@@ -26,6 +26,7 @@ namespace Ogrenci_Bilgi_Sistemi
             dersKayitYonetici = new DersKayitYonetici(ogrenciYonetici, dersYonetici); // Yeni eklenen
             transkriptYonetici = new TranskriptYonetici(ogrenciYonetici, dersYonetici, notYonetici);
         }
+    
 
         // Örnek veriler yükleme (public yapıldı)
         public void OrnekVerilerYukle()

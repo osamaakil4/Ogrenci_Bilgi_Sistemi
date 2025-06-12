@@ -211,5 +211,10 @@ namespace Ogrenci_Bilgi_Sistemi
             Console.WriteLine($"Toplam Ders Sayısı: {ogrencininDersleri.Count}");
             Console.WriteLine($"Toplam Kredi: {toplamKredi}");
         }
+        public List<OgrenciDersKayit> TumDersKayitlari()
+        {
+            return dersKayitlari.ToList();
+        }
+
     }
 }

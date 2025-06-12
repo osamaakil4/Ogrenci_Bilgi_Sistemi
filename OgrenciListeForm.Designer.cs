@@ -35,6 +35,7 @@
         private Button btnYenile;
         private Label lblToplam;
         private Button btnDetay;
+        private Button btnSil;
         private Button btnKapat;
     }
 }
