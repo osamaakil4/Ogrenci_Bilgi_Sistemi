@@ -18,10 +18,9 @@ using System.Threading.Tasks;
 
         public VeriYoneticisi()
         {
-            // Uygulama klasörü
             dosyaYolu = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OgrenciBilgiSistemi");
 
-            // Klasör yoksa oluştur
+            
             if (!Directory.Exists(dosyaYolu))
             {
                 Directory.CreateDirectory(dosyaYolu);
@@ -34,7 +33,7 @@ using System.Threading.Tasks;
             dersKayitDosya = Path.Combine(dosyaYolu, "derskayitlari.json");
         }
 
-        // Öğrencileri kaydetme
+        
         public bool OgrencileriKaydet(List<Ogrenci> ogrenciler)
         {
             try
@@ -50,7 +49,6 @@ using System.Threading.Tasks;
             }
         }
 
-        // Öğrencileri yükleme
         public List<Ogrenci> OgrencileriYukle()
         {
             try
@@ -68,7 +66,7 @@ using System.Threading.Tasks;
             }
         }
 
-        // Dersleri kaydetme
+    
         public bool DersleriKaydet(List<Ders> dersler)
         {
             try
@@ -98,7 +96,7 @@ using System.Threading.Tasks;
             }
         }
 
-        // Dersleri yükleme
+      
         public List<Ders> DersleriYukle()
         {
             try
@@ -131,7 +129,7 @@ using System.Threading.Tasks;
             }
         }
 
-        // GÜNCELLENMIŞ: Notları kaydetme - basit veri yapısı kullanılıyor
+       
         public bool NotlariKaydet(List<Not> notlar)
         {
             try
@@ -161,7 +159,7 @@ using System.Threading.Tasks;
             }
         }
 
-        // GÜNCELLENMIŞ: Notları yükleme - basit veri yapısından Not nesnesi oluşturma
+    
         public List<Not> NotlariYukle()
         {
             try
@@ -179,14 +177,10 @@ using System.Threading.Tasks;
                 var notlar = new List<Not>();
                 foreach (var veri in notVerileri)
                 {
-                    var not = new Not(veri.OgrenciNo, veri.DersKodu, veri.VizeNotu, veri.FinalNotu)
-                    {
-                    
-                    };
+                var not = new Not(veri.OgrenciNo, veri.DersKodu, veri.VizeNotu, veri.FinalNotu)
+                {
 
-                    // Bütünleme notu varsa ekle
-                
-                    notlar.Add(not);
+                };
                 }
 
                 Console.WriteLine($"Toplam {notlar.Count} not nesnesi oluşturuldu.");
@@ -199,7 +193,6 @@ using System.Threading.Tasks;
             }
         }
 
-        // Ders kayıtlarını kaydetme
         public bool DersKayitlariniKaydet(List<OgrenciDersKayit> dersKayitlari)
         {
             try
@@ -225,7 +218,7 @@ using System.Threading.Tasks;
             }
         }
 
-        // Ders kayıtlarını yükleme
+   
         public Dictionary<string, List<string>> DersKayitlariniYukle()
         {
             try
@@ -256,7 +249,7 @@ using System.Threading.Tasks;
             }
         }
 
-        // GÜNCELLENMIŞ: Tüm verileri kaydetme - daha detaylı log
+     
         public bool TumVerileriKaydet(SistemYonetici sistem)
         {
             bool basarili = true;
@@ -290,12 +283,12 @@ using System.Threading.Tasks;
             return basarili;
         }
 
-        // GÜNCELLENMIŞ: Tüm verileri yükleme - doğru sıralama ve daha detaylı log
+        
         public void TumVerileriYukle(SistemYonetici sistem)
         {
             Console.WriteLine("Veri yükleme işlemi başlatılıyor...");
 
-            // 1. Önce öğrencileri yükle
+          
             var ogrenciler = OgrencileriYukle();
             Console.WriteLine($"Yüklenen öğrenci sayısı: {ogrenciler.Count}");
             foreach (var ogrenci in ogrenciler)
@@ -303,7 +296,7 @@ using System.Threading.Tasks;
                 sistem.OgrenciYoneticisi.OgrenciEkle(ogrenci);
             }
 
-            // 2. Sonra dersleri yükle
+          
             var dersler = DersleriYukle();
             Console.WriteLine($"Yüklenen ders sayısı: {dersler.Count}");
             foreach (var ders in dersler)
@@ -311,7 +304,7 @@ using System.Threading.Tasks;
                 sistem.DersYoneticisi.DersEkle(ders);
             }
 
-            // 3. Ders kayıtlarını yükle
+           
             var dersKayitlari = DersKayitlariniYukle();
             int toplamDersKayit = 0;
             foreach (var kayit in dersKayitlari)
@@ -324,12 +317,11 @@ using System.Threading.Tasks;
             }
             Console.WriteLine($"Yüklenen ders kaydı sayısı: {toplamDersKayit}");
 
-            // 4. En son notları yükle (öğrenci ve ders bilgileri hazır olduktan sonra)
+            
             var notlar = NotlariYukle();
             Console.WriteLine($"Yüklenen not sayısı: {notlar.Count}");
             foreach (var not in notlar)
             {
-                // Not eklemeden önce öğrenci ve dersin var olduğunu kontrol et
                 var ogrenci = sistem.OgrenciYoneticisi.OgrenciAra(not.OgrenciNo);
                 var ders = sistem.DersYoneticisi.DersBul(not.DersKodu);
 
@@ -348,7 +340,7 @@ using System.Threading.Tasks;
         }
     }
 
-    // Ders verisi için yardımcı sınıf
+
     public class DersVeri
     {
         public string Kod { get; set; }
@@ -356,17 +348,17 @@ using System.Threading.Tasks;
         public int Kredi { get; set; }
         public string Donem { get; set; }
         public int Akts { get; set; }
-        public string Turu { get; set; } // "Zorunlu" veya "Secmeli"
+        public string Turu { get; set; } 
     }
 
-    // Ders kayıt verisi için yardımcı sınıf
+  
     public class DersKayitVeri
     {
         public string OgrenciNo { get; set; }
         public string DersKodu { get; set; }
     }
 
-    // YENİ: Not verisi için yardımcı sınıf - JSON serileştirme için
+   
     public class NotVeri
     {
         public string OgrenciNo { get; set; }

@@ -20,13 +20,7 @@ namespace Ogrenci_Bilgi_Sistemi
             this.notYonetici = notYonetici;
         }
 
-        // IRaporlanabilir interface implementation
-        public string RaporOlustur()
-        {
-            return "Transkript raporu oluşturuldu.";
-        }
-
-        // Belirli öğrenci için transkript oluşturma
+        // IRaporlanabilir Belirli öğrenci için transkript oluşturma
         public string TranskriptOlustur(string ogrenciNo)
         {
             var ogrenci = ogrenciYonetici.OgrenciGetir(ogrenciNo);
@@ -108,89 +102,7 @@ namespace Ogrenci_Bilgi_Sistemi
             return sb.ToString();
         }
 
-        // Transkripti konsola yazdırma
-        public void TranskriptYazdir(string ogrenciNo)
-        {
-            string transkript = TranskriptOlustur(ogrenciNo);
-            Console.WriteLine(transkript);
-        }
 
-        // Console'a yazdırma
-        public void ConsoleYazdir(string ogrenciNo)
-        {
-            TranskriptYazdir(ogrenciNo);
-        }
-
-        // PDF oluşturma (basit text dosyası olarak)
-        public bool PDFOlustur(string ogrenciNo)
-        {
-            try
-            {
-                var ogrenci = ogrenciYonetici.OgrenciGetir(ogrenciNo);
-                if (ogrenci == null)
-                {
-                    Console.WriteLine($"Öğrenci bulunamadı: {ogrenciNo}");
-                    return false;
-                }
-
-                string transkript = TranskriptOlustur(ogrenciNo);
-                string dosyaAdi = $"Transkript_{ogrenciNo}_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-
-                File.WriteAllText(dosyaAdi, transkript, Encoding.UTF8);
-                Console.WriteLine($"Transkript dosyası oluşturuldu: {dosyaAdi}");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Dosya oluşturulurken hata oluştu: {ex.Message}");
-                return false;
-            }
-        }
-
-        // GANO hesaplama
-        public double GanoHesapla(string ogrenciNo)
-        {
-            return notYonetici.GanoHesapla(ogrenciNo);
-        }
-
-        // Toplam kredi hesaplama
-        public int ToplamKrediHesapla(string ogrenciNo)
-        {
-            var ogrenciNotlari = notYonetici.OgrenciNotlari(ogrenciNo);
-            int toplamKredi = 0;
-
-            foreach (var not in ogrenciNotlari)
-            {
-                var ders = dersYonetici.DersGetir(not.DersKodu);
-                if (ders != null)
-                {
-                    toplamKredi += ders.Kredi;
-                }
-            }
-
-            return toplamKredi;
-        }
-
-        // Başarılan kredi hesaplama
-        public int BasariliKrediHesapla(string ogrenciNo)
-        {
-            var ogrenciNotlari = notYonetici.OgrenciNotlari(ogrenciNo);
-            int basariliKredi = 0;
-
-            foreach (var not in ogrenciNotlari)
-            {
-                if (not.GectiMi())
-                {
-                    var ders = dersYonetici.DersGetir(not.DersKodu);
-                    if (ders != null)
-                    {
-                        basariliKredi += ders.Kredi;
-                    }
-                }
-            }
-
-            return basariliKredi;
-        }
 
 
       

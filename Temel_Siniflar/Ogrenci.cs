@@ -54,7 +54,7 @@ public class Ogrenci
             set { kayitTarihi = value; } 
         }
 
-        // Methods
+    
         public string TamAd()
         {
             return $"{ad} {soyad}";

@@ -11,13 +11,8 @@ namespace Ogrenci_Bilgi_Sistemi
         private double final;
         private double ortalama;
         private string harfNotu;
-        private double harfNotuPuani; // Harf notunun puan karşılığı
+        private double harfNotuPuani; 
 
-        // Constructor
-        public Not(string ogrenciNo)
-        {
-            this.ogrenciNo = ogrenciNo;
-        }
 
         public Not(string ogrenciNo, string dersKodu, double vize, double final )
         {
@@ -29,7 +24,6 @@ namespace Ogrenci_Bilgi_Sistemi
             HesaplaHarfNotu();
         }
 
-        // Properties
         public string OgrenciNo
         {
             get { return ogrenciNo; }
@@ -48,8 +42,7 @@ namespace Ogrenci_Bilgi_Sistemi
             set
             {
                 vize = value;
-                HesaplaOrtalama();
-                HesaplaHarfNotu();
+               
             }
         }
 
@@ -59,8 +52,7 @@ namespace Ogrenci_Bilgi_Sistemi
             set
             {
                 final = value;
-                HesaplaOrtalama();
-                HesaplaHarfNotu();
+               
             }
         }
 
@@ -79,7 +71,7 @@ namespace Ogrenci_Bilgi_Sistemi
             get { return harfNotuPuani; }
         }
 
-        // Methods
+      
         public void HesaplaOrtalama()
         {
             ortalama = vize * 0.4 + final * 0.6;
@@ -97,36 +89,32 @@ namespace Ogrenci_Bilgi_Sistemi
                 harfNotu = "BA";
                 harfNotuPuani = 3.5;
             }
-            else if (ortalama >= 80)
+            else if (ortalama >=75 )
             {
                 harfNotu = "BB";
                 harfNotuPuani = 3.0;
             }
-            else if (ortalama >= 75)
+            else if (ortalama >= 70)
             {
                 harfNotu = "CB";
                 harfNotuPuani = 2.5;
             }
-            else if (ortalama >= 70)
+            else if (ortalama >= 60)
             {
                 harfNotu = "CC";
                 harfNotuPuani = 2.0;
             }
-            else if (ortalama >= 65)
+            else if (ortalama >= 55)
             {
                 harfNotu = "DC";
                 harfNotuPuani = 1.5;
             }
-            else if (ortalama >= 60)
+            else if (ortalama >= 50)
             {
                 harfNotu = "DD";
                 harfNotuPuani = 1.0;
             }
-            else if (ortalama >= 50)
-            {
-                harfNotu = "FD";
-                harfNotuPuani = 0.5;
-            }
+        
             else
             {
                 harfNotu = "FF";
@@ -134,45 +122,19 @@ namespace Ogrenci_Bilgi_Sistemi
             }
         }
 
-        public string GetOgrenciNo()
-        {
-            return ogrenciNo;
-        }
-
-        public string GetDersKodu()
-        {
-            return dersKodu;
-        }
-
-        public void SetVize(int vize)
-        {
-            this.vize = vize;
-            HesaplaOrtalama();
-            HesaplaHarfNotu();
-        }
-
-        public void SetFinal(int final)
-        {
-            this.final = final;
-            HesaplaOrtalama();
-            HesaplaHarfNotu();
-        }
-
+ 
         public string GetInfo()
         {
             return $"{ogrenciNo} - {dersKodu}: Vize={vize}, Final={final}, Ortalama={ortalama:F2}, Harf={harfNotu} ({harfNotuPuani:F1})";
         }
 
-        // Not geçme kontrolü
         public bool GectiMi()
         {
-            return harfNotu != "FF" && harfNotu != "FD";
+            return harfNotu != "FF";
         }
 
-        // AKTS bazlı not hesaplama için yardımcı metod
-        public double AktsBazliPuan(int akts)
-        {
-            return harfNotuPuani * akts;
-        }
+       
+
+
     }
 }

@@ -10,7 +10,7 @@ namespace Ogrenci_Bilgi_Sistemi
         private TranskriptYonetici transkriptYonetici;
         private DersKayitYonetici dersKayitYonetici; 
 
-        // Public property'ler - Formlara erişim için
+       
         public OgrenciYonetici OgrenciYoneticisi => ogrenciYonetici;
         public DersYonetici DersYoneticisi => dersYonetici;
         public NotYonetici NotYoneticisi => notYonetici;
@@ -37,24 +37,16 @@ namespace Ogrenci_Bilgi_Sistemi
             ogrenciYonetici.OgrenciEkle(new Ogrenci("2021003", "Mehmet", "Demir", "mehmet@email.com"));
 
             // Örnek dersler
-            dersYonetici.DersEkle(new ZorunluDers("CS101", "Programlama Temelleri", 4, "Güz",4,""));
-            dersYonetici.DersEkle(new ZorunluDers("CS102", "Veri Yapıları", 3, "Bahar", 5, ""));
-            dersYonetici.DersEkle(new ZorunluDers("CS102", "Veri Yapıları", 3, "Bahar", 3, ""));
-            dersYonetici.DersEkle(new SecmeliDers("CS201", "Web Programlama", 3, "Bahar", 2, ""));
-            dersYonetici.DersEkle(new ZorunluDers("CS103", "Algoritma Analizi", 4, "Güz", 2, ""));
-            dersYonetici.DersEkle(new SecmeliDers("CS202", "Mobil Programlama", 3, "Güz", 7, "2"));
+            dersYonetici.DersEkle(new ZorunluDers("CS101", "Programlama Temelleri", 4, 3,"Güz"));
+            dersYonetici.DersEkle(new ZorunluDers("CS102", "Veri Yapıları", 3, 5,"Bahar"));
+            dersYonetici.DersEkle(new ZorunluDers("CS102", "Veri Yapıları", 3,4, "Bahar"));
+            dersYonetici.DersEkle(new SecmeliDers("CS201", "Web Programlama", 3,2, "Bahar"));
+            dersYonetici.DersEkle(new ZorunluDers("CS103", "Algoritma Analizi", 4,2, "Güz"));
+            dersYonetici.DersEkle(new SecmeliDers("CS202", "Mobil Programlama", 3,  7, "Güz"));
 
-            // Örnek ders kayıtları
-            dersKayitYonetici.DersKaydiEkle("2021001", "CS101");
-            dersKayitYonetici.DersKaydiEkle("2021001", "CS102");
-            dersKayitYonetici.DersKaydiEkle("2021002", "CS101");
-            dersKayitYonetici.DersKaydiEkle("2021002", "CS201");
-            dersKayitYonetici.DersKaydiEkle("2021003", "CS101");
+      
 
-            // Örnek notlar
-            notYonetici.NotEkle(new Not("2021001", "CS101", 85, 90));
-            notYonetici.NotEkle(new Not("2021002", "CS101", 78, 82));
-            notYonetici.NotEkle(new Not("2021001", "CS102", 92, 88));
+      
         }
     }
 }

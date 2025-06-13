@@ -32,7 +32,7 @@ namespace Ogrenci_Bilgi_Sistemi
         private DersYonetici dersYoneticisi;
         private NotYonetici notYoneticisi;
 
-        // Ana constructor - MainForm'dan çağrılacak
+        
         public NotGirForm(OgrenciYonetici ogrenciYonetici, DersYonetici dersYonetici, NotYonetici notYonetici, DersKayitYonetici dersKayitYonetici)
         {
             this.ogrenciYonetici = ogrenciYonetici;

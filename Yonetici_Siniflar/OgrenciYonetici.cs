@@ -8,13 +8,13 @@ namespace Ogrenci_Bilgi_Sistemi
     {
         private Dictionary<string, Ogrenci> ogrenciler;
 
-        // Constructor
+       
         public OgrenciYonetici()
         {
             ogrenciler = new Dictionary<string, Ogrenci>();
         }
 
-        // Öğrenci ekleme
+        
         public bool OgrenciEkle(Ogrenci ogrenci)
         {
             if (ogrenci == null || string.IsNullOrEmpty(ogrenci.OgrenciNo))
@@ -33,7 +33,6 @@ namespace Ogrenci_Bilgi_Sistemi
             return true;
         }
 
-        // Öğrenci getirme
         public Ogrenci OgrenciGetir(string ogrenciNo)
         {
             if (string.IsNullOrEmpty(ogrenciNo))
@@ -45,30 +44,9 @@ namespace Ogrenci_Bilgi_Sistemi
             return ogrenci;
         }
 
-        // Öğrenci güncelleme
-        public bool OgrenciGuncelle(string ogrenciNo, string yeniAd, string yeniSoyad, string yeniEmail)
-        {
-            Ogrenci ogrenci = OgrenciGetir(ogrenciNo);
-            if (ogrenci == null)
-            {
-                Console.WriteLine($"Öğrenci bulunamadı: {ogrenciNo}");
-                return false;
-            }
 
-            if (!string.IsNullOrEmpty(yeniAd))
-                ogrenci.Ad = yeniAd;
 
-            if (!string.IsNullOrEmpty(yeniSoyad))
-                ogrenci.Soyad = yeniSoyad;
-
-            if (!string.IsNullOrEmpty(yeniEmail))
-                ogrenci.Email = yeniEmail;
-
-            Console.WriteLine($"Öğrenci başarıyla güncellendi: {ogrenci.GetInfo()}");
-            return true;
-        }
-
-        // Öğrenci silme
+     
         public bool OgrenciSil(string ogrenciNo)
         {
             if (string.IsNullOrEmpty(ogrenciNo))
@@ -88,13 +66,12 @@ namespace Ogrenci_Bilgi_Sistemi
             return true;
         }
 
-        // Tüm öğrencileri listeleme
         public List<Ogrenci> TumOgrenciler()
         {
             return ogrenciler.Values.ToList();
         }
 
-        // Öğrenci var mı kontrolü
+       
         public bool OgrenciVarMi(string ogrenciNo)
         {
             if (string.IsNullOrEmpty(ogrenciNo))
@@ -105,41 +82,26 @@ namespace Ogrenci_Bilgi_Sistemi
             return ogrenciler.ContainsKey(ogrenciNo);
         }
 
-        // Toplam öğrenci sayısı
+     
         public int ToplamOgrenciSayisi()
         {
             return ogrenciler.Count;
         }
 
-        // Öğrencileri görüntüleme
-        public void OgrencileriGoruntule()
-        {
-            if (ogrenciler.Count == 0)
-            {
-                Console.WriteLine("Sistemde kayıtlı öğrenci bulunmamaktadır.");
-                return;
-            }
+        
 
-            Console.WriteLine("\n=== KAYITLI ÖĞRENCİLER ===");
-            foreach (var ogrenci in ogrenciler.Values)
-            {
-                Console.WriteLine(ogrenci.GetInfo());
-            }
-            Console.WriteLine($"Toplam öğrenci sayısı: {ogrenciler.Count}");
-        }
-
-        // Öğrenci arama (ad/soyad ile)
-        public List<Ogrenci> OgrenciAra(string aramaKelimesi)
+      
+        public List<Ogrenci> OgrenciAra(string adsoyad)
         {
-            if (string.IsNullOrEmpty(aramaKelimesi))
+            if (string.IsNullOrEmpty(adsoyad))
             {
                 return new List<Ogrenci>();
             }
 
             return ogrenciler.Values
-                .Where(o => o.Ad.ToLower().Contains(aramaKelimesi.ToLower()) ||
-                           o.Soyad.ToLower().Contains(aramaKelimesi.ToLower()) ||
-                           o.TamAd().ToLower().Contains(aramaKelimesi.ToLower()))
+                .Where(o => o.Ad.ToLower().Contains(adsoyad.ToLower()) ||
+                           o.Soyad.ToLower().Contains(adsoyad.ToLower()) ||
+                           o.TamAd().ToLower().Contains(adsoyad.ToLower()))
                 .ToList();
         }
     }

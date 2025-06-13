@@ -9,10 +9,7 @@ namespace Ogrenci_Bilgi_Sistemi
         protected int akts; 
         protected string donem;
 
-        // Constructor
-        public Ders()
-        {
-        }
+    
 
         public Ders(string kod, string ad, int kredi, int akts, string donem)
         {
@@ -21,7 +18,8 @@ namespace Ogrenci_Bilgi_Sistemi
             this.kredi = kredi;
             this.akts = akts;
             this.donem = donem;
-        }
+        } 
+        public abstract string GetTuru();
 
         // Properties
         public string Kod
@@ -53,34 +51,11 @@ namespace Ogrenci_Bilgi_Sistemi
             get { return donem; }
             set { donem = value; }
         }
-
-        // Methods
-        public string GetKod()
-        {
-            return kod;
-        }
-
-        public string GetAd()
-        {
-            return ad;
-        }
-
-        public int GetKredi()
-        {
-            return kredi;
-        }
-
-        public int GetAkts()
-        {
-            return akts;
-        }
-
-        // Abstract method - Alt sınıflar implement etmeli
-        public abstract string GetTuru();
-
+       
         public virtual string GetInfo()
         {
             return $"{kod} - {ad} ({kredi} kredi, {akts} AKTS) - {GetTuru()}";
         }
-    }
+
+}
 }
