@@ -15,6 +15,7 @@ namespace Ogrenci_Bilgi_Sistemi
         private NotYonetici notYonetici;
         private OgrenciYonetici ogrenciYonetici;
         private DersYonetici dersYonetici;
+        private DersKayitYonetici dersKayitYonetici; // Yeni eklenen
         private ComboBox cmbOgrenci;
         private ComboBox cmbDers;
         private TextBox txtVize;
@@ -27,17 +28,22 @@ namespace Ogrenci_Bilgi_Sistemi
         private Label lblBilgi;
         private Button btnKaydet;
         private Button btnIptal;
+        private OgrenciYonetici ogrenciYoneticisi;
+        private DersYonetici dersYoneticisi;
+        private NotYonetici notYoneticisi;
 
         // Ana constructor - MainForm'dan çağrılacak
-        public NotGirForm(OgrenciYonetici ogrenciYonetici, DersYonetici dersYonetici, NotYonetici notYonetici)
+        public NotGirForm(OgrenciYonetici ogrenciYonetici, DersYonetici dersYonetici, NotYonetici notYonetici, DersKayitYonetici dersKayitYonetici)
         {
             this.ogrenciYonetici = ogrenciYonetici;
             this.dersYonetici = dersYonetici;
             this.notYonetici = notYonetici;
+            this.dersKayitYonetici = dersKayitYonetici; // Yeni eklenen
             InitializeComponent();
-            ComboBoxlariDoldur();
+            OgrencileriDoldur();
         }
 
+       
         private void InitializeComponent()
         {
             this.lblBaslik = new Label();
@@ -79,6 +85,7 @@ namespace Ogrenci_Bilgi_Sistemi
             this.cmbOgrenci.Name = "cmbOgrenci";
             this.cmbOgrenci.Size = new Size(250, 33);
             this.cmbOgrenci.TabIndex = 2;
+            this.cmbOgrenci.SelectedIndexChanged += this.CmbOgrenci_SelectedIndexChanged; // Event eklendi
             // 
             // lblDers
             // 
@@ -185,7 +192,8 @@ namespace Ogrenci_Bilgi_Sistemi
             PerformLayout();
         }
 
-        private void ComboBoxlariDoldur()
+        // Sadece öğrencileri doldur
+        private void OgrencileriDoldur()
         {
             try
             {
@@ -196,21 +204,55 @@ namespace Ogrenci_Bilgi_Sistemi
                 {
                     cmbOgrenci.Items.Add($"{ogrenci.OgrenciNo} - {ogrenci.Ad} {ogrenci.Soyad}");
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Öğrenciler yüklenirken hata oluştu: {ex.Message}", "Hata",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Öğrenci seçildiğinde sadece o öğrencinin kayıtlı olduğu dersleri göster
+        private void CmbOgrenci_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                cmbDers.Items.Clear();
+
+                if (cmbOgrenci.SelectedIndex == -1)
+                    return;
+
+                // Seçilen öğrencinin numarasını al
+                string ogrenciNo = cmbOgrenci.Text.Split('-')[0].Trim();
+
+                // Öğrencinin kayıtlı olduğu dersleri al
+                var ogrencininDersleri = dersKayitYonetici.OgrencininDersleri(ogrenciNo);
 
                 // Dersleri combobox'a ekle
-                cmbDers.Items.Clear();
-                var dersler = dersYonetici.TumDersler();
-                foreach (var ders in dersler)
+                foreach (var kayit in ogrencininDersleri)
                 {
-                    cmbDers.Items.Add($"{ders.Kod} - {ders.Ad}");
+                    var ders = dersYonetici.DersGetir(kayit.DersKodu);
+                    if (ders != null)
+                    {
+                        cmbDers.Items.Add($"{ders.Kod} - {ders.Ad}");
+                    }
+                }
+
+                // Eğer öğrencinin hiç kayıtlı dersi yoksa bilgi ver
+                if (cmbDers.Items.Count == 0)
+                {
+                    MessageBox.Show("Bu öğrencinin kayıtlı olduğu ders bulunmamaktadır.", "Bilgi",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"ComboBox'lar doldurulurken hata oluştu: {ex.Message}", "Hata", 
+                MessageBox.Show($"Dersler yüklenirken hata oluştu: {ex.Message}", "Hata",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        // Eski ComboBoxlariDoldur metodunu kaldırdık
 
         private void BtnKaydet_Click(object sender, EventArgs e)
         {
@@ -287,7 +329,7 @@ namespace Ogrenci_Bilgi_Sistemi
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Kaydet işlemi sırasında hata oluştu: {ex.Message}", "Hata", 
+                MessageBox.Show($"Kaydet işlemi sırasında hata oluştu: {ex.Message}", "Hata",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

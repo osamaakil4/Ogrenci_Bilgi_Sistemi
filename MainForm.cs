@@ -186,7 +186,8 @@ namespace Ogrenci_Bilgi_Sistemi
                 NotGirForm form = new NotGirForm(
                     sistemYonetici.OgrenciYoneticisi,
                     sistemYonetici.DersYoneticisi,
-                    sistemYonetici.NotYoneticisi
+                    sistemYonetici.NotYoneticisi,
+                    sistemYonetici.DersKayitYoneticisi
                 );
                 form.ShowDialog();
 
