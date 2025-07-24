@@ -188,19 +188,6 @@ Sistem, test amaçlı olarak aşağıdaki örnek verilerle gelir:
 - **Not aralığı**: 0-100
 - **Öğrenci numarası**: Benzersiz olmalı
 
-## 🐛 Bilinen Sorunlar
-
-- Çok büyük veri setlerinde performans düşüşü yaşanabilir
-- Ağ bağlantısı gerektirmez (offline çalışır)
-
-## 🤝 Katkıda Bulunma
-
-1. Bu repository'yi fork edin
-2. Feature branch oluşturun (`git checkout -b feature/YeniOzellik`)
-3. Değişikliklerinizi commit edin (`git commit -am 'Yeni özellik eklendi'`)
-4. Branch'inizi push edin (`git push origin feature/YeniOzellik`)
-5. Pull Request oluşturun
-
 ## 📝 Lisans
 
 Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosyasına bakınız.
