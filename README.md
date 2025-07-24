@@ -207,9 +207,9 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosy
 
 ## 📞 İletişim
 
-- **Geliştirici**: [İsim Soyisim]
-- **E-posta**: [email@example.com]
-- **GitHub**: [https://github.com/kullaniciadi]
+- **Geliştirici**: [Muhammed Usame Akil]
+- **E-posta**: [osamaakil4@gmail.com]
+- **GitHub**: [https://github.com/osamaakil4]
 
 ## 🔄 Versiyon Geçmişi
 
